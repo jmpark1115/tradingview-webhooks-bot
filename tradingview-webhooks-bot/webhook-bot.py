@@ -20,11 +20,13 @@ app = Flask(__name__)
 # Create root to easily let us know its on/working.
 @app.route('/')
 def root():
+    print('online....')
     return 'online'
 
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
+    print('webhook1234')
     if request.method == 'POST':
         # Parse the string data from tradingview into a python dict
         data = parse_webhook(request.get_data(as_text=True))
@@ -39,6 +41,22 @@ def webhook():
     else:
         abort(400)
 
+@app.route('/webhook/', methods=['POST'])
+def webhook2():
+    print('webhook2')
+    if request.method == 'POST':
+        # Parse the string data from tradingview into a python dict
+        data = parse_webhook(request.get_data(as_text=True))
+        # Check that the key is correct
+        if get_token() == data['key']:
+            print(' [Alert Received] ')
+            print('POST Received:', data)
+            send_order(data)
+            return '', 200
+        else:
+            abort(403)
+    else:
+        abort(400)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host='0.0.0.0', port=80)
